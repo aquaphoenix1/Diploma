@@ -28,12 +28,6 @@ namespace ApproximationHRBF
                 textBoxMoment.Text = textBoxMoment.Text.Replace('.', ',');
                 textBoxCoefT.Text = textBoxCoefT.Text.Replace('.', ',');
                 this.Hide();
-                /*formMain.InitializeNetwork(Int16.Parse(textBoxCountEnters.Text),
-                    Int16.Parse(textBoxCountNeurons.Text), 
-                    Int32.Parse(textBoxCountItterations.Text), 
-                    Double.Parse(textBoxCoefficient.Text), 
-                    Double.Parse(textBoxMoment.Text), 
-                    Double.Parse(textBoxCoefT.Text));*/
                 formMain.InitializeNetwork(Int32.Parse(textBoxCountItterations.Text), 
                     Double.Parse(textBoxCoefficient.Text),
                     Double.Parse(textBoxMoment.Text),
@@ -41,12 +35,11 @@ namespace ApproximationHRBF
                     Double.Parse(textBoxError.Text));
                 buttonCancel_Click(sender, e);
             }
-            catch (Exception exe)
+            catch
             {
-                MessageBox.Show(exe.Message);
                 this.Show();
                 formMain.Hide();
-                //MessageBox.Show("Проверьте правильность параметров");
+                MessageBox.Show("Проверьте правильность параметров");
             }
         }
     }

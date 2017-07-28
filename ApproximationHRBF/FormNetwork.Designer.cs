@@ -125,7 +125,7 @@
             this.textBoxCoefficient.Name = "textBoxCoefficient";
             this.textBoxCoefficient.Size = new System.Drawing.Size(100, 20);
             this.textBoxCoefficient.TabIndex = 8;
-            this.textBoxCoefficient.Text = "0.5";
+            this.textBoxCoefficient.Text = "0.2";
             // 
             // labelCoefficient
             // 
@@ -185,7 +185,7 @@
             this.textBoxError.Name = "textBoxError";
             this.textBoxError.Size = new System.Drawing.Size(100, 20);
             this.textBoxError.TabIndex = 15;
-            this.textBoxError.Text = "0.01";
+            this.textBoxError.Text = "0.001";
             // 
             // FormNetwork
             // 

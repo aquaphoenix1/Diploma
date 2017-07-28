@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 namespace ApproximationHRBF
 {
@@ -35,20 +36,28 @@ namespace ApproximationHRBF
                 Layers[1].InitNeuron(i, new System.Random().NextDouble(), radius, arrayOfX[i]);
         }
 
-        public void Learning(FormMain form, int countItterations, double learningCoefficient, double momentum, double coefficientT, double[] arrayOfX, double[] arrayOfY)
+        public void Learning(int countItterations, int countIntervals, double learningCoefficient, double error, double momentum,  double[] arrayOfX, double[] arrayOfY)
         {
-            for (int j = 0; j < countItterations; j++)
+            int j = 0;
+            double err = Double.MaxValue;
+            while (j < countItterations && err > error)
             {
+                err = 0;
                 for (int i = 0; i < arrayOfX.Length; i++)
                 {
                     double gaussian = Layers[1].Compute(i, arrayOfX[i]);
                     double value = gaussian * Layers[1].Neurons[i].Weight;
-                    double error = System.Math.Pow(value - arrayOfY[i], 2) / 2;
-                    form.SetNewValue(i, value);
+                    err += System.Math.Pow(value - arrayOfY[i], 2) / (countIntervals - 1);
+
                     Layers[1].RecalculateWeight(i, arrayOfX[i], value, arrayOfY[i], gaussian, learningCoefficient, momentum);
                     Layers[1].RecalculateCenter(i, learningCoefficient, value, arrayOfY[i], Layers[1].Neurons[i].Weight, arrayOfX[i], Layers[1].Neurons[i].Center, Layers[1].Neurons[i].Radius);
                     Layers[1].RecalculateRadius(i, learningCoefficient, value, arrayOfY[i], Layers[1].Neurons[i].Weight, arrayOfX[i], Layers[1].Neurons[i].Center, Layers[1].Neurons[i].Radius);
+
+                    gaussian = Layers[1].Compute(i, arrayOfX[i]);
+                    value = gaussian * Layers[1].Neurons[i].Weight;
+                    arrayOfY[i] = value;
                 }
+                j++;
             }
         }
     }

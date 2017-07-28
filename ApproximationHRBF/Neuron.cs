@@ -2,6 +2,7 @@
 using System;
 namespace ApproximationHRBF
 {
+    [Serializable]
     class Neuron
     {
         public double Weight { get; set; }

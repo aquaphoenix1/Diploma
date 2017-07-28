@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -12,6 +14,7 @@ namespace ApproximationHRBF
             InitializeComponent();
             chartHystogram.Series["Идеальное значение"].ChartType = SeriesChartType.Line;
             chartHystogram.Series["Значение сети"].ChartType = SeriesChartType.Line;
+            chartHystogram.Series["Полученное значение"].ChartType = SeriesChartType.Line;
         }
 
         private void generatorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -20,14 +23,17 @@ namespace ApproximationHRBF
             this.Hide();
             form.ShowDialog();
             this.Show();
+            if (arrayDistribution != null)
+            {
+                networkParametrsToolStripMenuItem.Enabled = true;
+                networkParametrsToolStripMenuItem.Visible = true;
+            }
         }
 
         private double[] arrayDistribution = null;
 
         private double[] arrayOfX;
-        private double[] arrayOfYGood;
-        private double[] arrayOfYBad;
-        private double[] arrayOfBadX;
+        private double[] arrayOfY;
         private int countIntervals;
 
         public void Generate(Distribution distribution, int countIntervals)
@@ -36,7 +42,7 @@ namespace ApproximationHRBF
             this.countIntervals = countIntervals;
             Array.Sort(arrayDistribution);
             arrayOfX = new double[countIntervals];
-            arrayOfYGood = new double[countIntervals];
+            arrayOfY = new double[countIntervals];
             double minX = arrayDistribution[0];
             double maxX = arrayDistribution[arrayDistribution.Length - 1];
             double step = (maxX - minX) / countIntervals;
@@ -48,39 +54,15 @@ namespace ApproximationHRBF
                 for (int j = 0; j < countIntervals - 1; j++)
                     if (arrayDistribution[i] >= arrayOfX[j] && arrayDistribution[i] < arrayOfX[j + 1])
                     {
-                        arrayOfYGood[j]++;
+                        arrayOfY[j]++;
                         sum++;
                         break;
                     }
-            arrayOfYGood[arrayOfYGood.Length - 1] = arrayDistribution.Length - sum;
+            arrayOfY[arrayOfY.Length - 1] = arrayDistribution.Length - sum;
             for (int i = 0; i < countIntervals; i++)
-                arrayOfYGood[i] /= arrayDistribution.Length;
+                arrayOfY[i] /= arrayDistribution.Length;
 
-            arrayOfBadX = new double[countIntervals];
-            sum = 0;
-            double[] arr = distribution.GenerateBad();
-            Array.Sort(arr);
-            arrayOfYBad = new double[countIntervals];
-            minX = arr[0];
-            maxX = arr[arr.Length - 1];
-            step = (maxX - minX) / countIntervals;
-            arrayOfBadX[0] = minX;
-            for (int i = 1; i < countIntervals; i++)
-                arrayOfBadX[i] = arrayOfBadX[i - 1] + step;
-            for (int i = 0; i < arr.Length; i++)
-                for (int j = 0; j < countIntervals - 1; j++)
-                    if (arr[i] >= arrayOfBadX[j] && arr[i] < arrayOfBadX[j + 1])
-                    {
-                        arrayOfYBad[j]++;
-                        sum++;
-                        break;
-                    }
-            arrayOfYBad[arrayOfYBad.Length - 1] = arr.Length - sum;
-            for (int i = 0; i < countIntervals; i++)
-                arrayOfYBad[i] /= arr.Length;
-
-            chartHystogram.Series["Идеальное значение"].Points.DataBindXY(arrayOfX, arrayOfYGood);
-            chartHystogram.Series["Значение сети"].Points.DataBindXY(arrayOfBadX, arrayOfYBad);
+            chartHystogram.Series["Идеальное значение"].Points.DataBindXY(arrayOfX, arrayOfY);
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
@@ -102,6 +84,11 @@ namespace ApproximationHRBF
 
         private void downloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            Download();
+        }
+
+        public bool Download()
+        {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Filter = "Текстовый документ (*.txt)|*.txt";
             try
@@ -112,9 +99,11 @@ namespace ApproximationHRBF
                     arrayDistribution = new double[array.Length];
                     for (int i = 0; i < array.Length; i++)
                         arrayDistribution[i] = Double.Parse(array[i]);
+                    return true;
                 }
             }
             catch { arrayDistribution = null; }
+            return false;
         }
 
         private void networkParametrsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -141,65 +130,168 @@ namespace ApproximationHRBF
             this.error = error;
             network = new Network(arrayOfX.Length);
             network.InitializeHideNeurons(arrayOfX);
+
+            learnNetworkToolStripMenuItem.Enabled = true;
+            learnNetworkToolStripMenuItem.Visible = true;
         }
 
-        public void SetNewValue(int index, double value)
+        private void SetNewValue(double[] arrayX, double[] arrayY)
         {
-            arrayOfYBad[index] = value;
-            chartHystogram.Invoke((MethodInvoker)(delegate() { chartHystogram.Series["Значение сети"].Points.DataBindXY(arrayOfBadX, arrayOfYBad); }));
+            chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["Идеальное значение"].Points.DataBindXY(arrayX, arrayY); });
         }
 
-        private void buttonLearn_Click(object sender, EventArgs e)
+        private void SetNewValue(double[] arrayX, double[] arrayY, double[] arrayOfValues)
         {
-            //network.Learning(this, countLearningItterations, learningCoefficient, momentum, coefficientT, arrayOfBadX, arrayOfYGood);
-            int j = 0;
-            double err = Double.MaxValue;
-            while (j < countLearningItterations && err > error)
-            {
-                err = 0;
-                for (int i = 0; i < arrayOfX.Length; i++)
-                {
-                    double gaussian = network.Layers[1].Compute(i, arrayOfX[i]);
+            chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["Значение сети"].Points.DataBindXY(arrayX, arrayY); });
+            chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["Полученное значение"].Points.DataBindXY(arrayX, arrayOfValues); });
+        }
+
+        /*double gaussian = network.Layers[1].Compute(i, arrayOfX[i]);
                     double value = gaussian * network.Layers[1].Neurons[i].Weight;
-                    err += System.Math.Pow(value - arrayOfYGood[i], 2) / (countIntervals - 1);
-                    //double error = System.Math.Pow(value - arrayOfYGood[i], 2) / (countIntervals-1);
-                    //SetNewValue(i, value);
-                    network.Layers[1].RecalculateWeight(i, arrayOfX[i], value, arrayOfYGood[i], gaussian, learningCoefficient, momentum);
-                    network.Layers[1].RecalculateCenter(i, learningCoefficient, value, arrayOfYGood[i], network.Layers[1].Neurons[i].Weight, arrayOfX[i], network.Layers[1].Neurons[i].Center, network.Layers[1].Neurons[i].Radius);
-                    network.Layers[1].RecalculateRadius(i, learningCoefficient, value, arrayOfYGood[i], network.Layers[1].Neurons[i].Weight, arrayOfX[i], network.Layers[1].Neurons[i].Center, network.Layers[1].Neurons[i].Radius);
-                }
-                j++;
-            }
-           // new Thread(() => Compute()).Start();
+                    err += System.Math.Pow(value - arrayOfY[i], 2) / (countIntervals - 1);
+                    network.Layers[1].one(i, learningCoefficient, this.network.Layers[1].CalculateSumOfFunctions(arrayOfX, i), arrayOfY[i], value);
+                    network.Layers[1].two(i, learningCoefficient, arrayOfY[i], value, this.network.Layers[1].CalculateSumOfFunctions(arrayOfX, i), arrayOfX[i]);
+                    network.Layers[1].three(i, learningCoefficient, arrayOfY[i], value, this.network.Layers[1].CalculateSumOfFunctions(arrayOfX, i), arrayOfX[i]);
+                    gaussian = network.Layers[1].Compute(i, arrayOfX[i]);
+                    value = gaussian * network.Layers[1].Neurons[i].Weight;
+                    arrayOfY[i] = value;*/
+
+        Task learningThread;
+
+        private void Learn()
+        {
+            network.Learning(countLearningItterations, countIntervals, learningCoefficient, error, momentum, arrayOfX, arrayOfY);
+            SetNewValue(arrayOfX, arrayOfY);
+            //switchButtons(true);
+        }
+
+        private double[] DistributeLoad(out double[] arrayOfDistributedX)
+        {
+            double[] arrayOfBadX = new double[countIntervals];
+            int sum = 0;
+            Array.Sort(arrayDistribution);
+            double[] arrayOfYBad = new double[countIntervals];
+            double minX = arrayDistribution[0];
+            double maxX = arrayDistribution[arrayDistribution.Length - 1];
+            double step = (maxX - minX) / countIntervals;
+            arrayOfBadX[0] = minX;
+            for (int i = 1; i < countIntervals; i++)
+                arrayOfBadX[i] = arrayOfBadX[i - 1] + step;
+            for (int i = 0; i < arrayDistribution.Length; i++)
+                for (int j = 0; j < countIntervals - 1; j++)
+                    if (arrayDistribution[i] >= arrayOfBadX[j] && arrayDistribution[i] < arrayOfBadX[j + 1])
+                    {
+                        arrayOfYBad[j]++;
+                        sum++;
+                        break;
+                    }
+            arrayOfYBad[arrayOfYBad.Length - 1] = arrayDistribution.Length - sum;
+            for (int i = 0; i < countIntervals; i++)
+                arrayOfYBad[i] /= arrayDistribution.Length;
+            arrayOfDistributedX = arrayOfBadX;
+            return arrayOfYBad;
         }
 
         private void Compute()
         {
-            //while (true)
+            List<double> errors = new List<double>();
+                double[] arrayOfLoadX,
+                arrayOfLoadY, 
+                values;
+                int j = 0;
+                double error;
+                bool isLoad;
+
+            while(true)
             {
-                double[] errors = new double[29];
-
-                for (int j = 0; j < 29; j++)
+                error = 0;
+                isLoad = Download();
+                if (isLoad)
                 {
-                    for (int i = 0; i < arrayOfBadX.Length; i++)
+                    arrayOfLoadY = DistributeLoad(out arrayOfLoadX);
+                    values = new double[arrayOfLoadX.Length];
+                    for (int i = 0; i < arrayOfLoadX.Length; i++)
                     {
-                        double gaussian = network.Layers[1].Compute(i, arrayOfBadX[i]);
+                        double gaussian = network.Layers[1].Compute(i, arrayOfLoadX[i]);
                         double value = gaussian * network.Layers[1].Neurons[i].Weight;
-                        errors[j] += System.Math.Pow(value - arrayOfYGood[i], 2) / (countIntervals - 1);
-                        SetNewValue(i, value);
+                        values[i] = value;
+                        error += System.Math.Pow(value - arrayOfY[i], 2) / (countIntervals - 1);
                     }
+                    errors.Add(error);
+                    SetNewValue(arrayOfLoadX, arrayOfLoadY, values);
+                    var result = MessageBox.Show("Загрузить следующий?", "Работоспособность сети", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.No)
+                        break;
                 }
-
-                Array.Sort(errors);
-                textBox1.Invoke((MethodInvoker)(delegate() { textBox1.Text = errors[28].ToString(); }));
-                //textBox1.Invoke((MethodInvoker)(delegate() { textBox1.Text = "0"; }));
-
+                else break;
             }
+
+            errors.Sort();
+            try
+            {
+                textBox1.Invoke((MethodInvoker)delegate { textBox1.Text = errors.ToArray()[errors.Count - 1].ToString(); });
+            }
+            catch { }
+
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void обучитьСетьToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            switchButtons(false);
+            learningThread = new Task(Learn);
+            learningThread.Start();
+            switchButtons(true);
+        }
+
+        private void switchButtons(bool switcher)
+        {
+            stopLearningToolStripMenuItem.Enabled = !switcher;
+            stopLearningToolStripMenuItem.Visible = !switcher;
+
+            learnNetworkToolStripMenuItem.Enabled = switcher;
+            learnNetworkToolStripMenuItem.Visible = switcher;
+
+            fileToolStripMenuItem.Enabled = switcher;
+            fileToolStripMenuItem.Visible = switcher;
+
+            generatorToolStripMenuItem.Enabled = switcher;
+            generatorToolStripMenuItem.Visible = switcher;
+
+            networkParametrsToolStripMenuItem.Enabled = switcher;
+            networkParametrsToolStripMenuItem.Visible = switcher;
+
+            testNetworkToolStripMenuItem.Enabled = switcher;
+            testNetworkToolStripMenuItem.Visible = switcher;
+        }
+
+        private void остановитьОбучениеToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            learningThread.Dispose();
+            switchButtons(true);
+        }
+
+        private void тестСетиToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //new Thread(() => Compute()).Start();
             Compute();
+        }
+
+        private void FormMain_Load(object sender, EventArgs e)
+        {
+            stopLearningToolStripMenuItem.Enabled = false;
+            stopLearningToolStripMenuItem.Visible = false;
+
+            learnNetworkToolStripMenuItem.Enabled = false;
+            learnNetworkToolStripMenuItem.Visible = false;
+
+            stopLearningToolStripMenuItem.Enabled = false;
+            stopLearningToolStripMenuItem.Visible = false;
+
+            networkParametrsToolStripMenuItem.Enabled = false;
+            networkParametrsToolStripMenuItem.Visible = false;
+
+            testNetworkToolStripMenuItem.Enabled = false;
+            testNetworkToolStripMenuItem.Visible = false;
         }
     }
 }
