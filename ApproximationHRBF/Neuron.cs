@@ -24,9 +24,11 @@ namespace ApproximationHRBF
             this.Weight = new Random().NextDouble();
         }
 
-        public double Compute(double x)
+        public double Compute(double x, int countNeurons)
         {
-            return Math.Exp(-0.5 * Math.Pow(((x - this.Center) / this.Radius), 2));
+            //return Math.Exp(-2 * Math.Pow(((x - this.Center) / this.Radius), 2));
+            double deltaCMax = Network.MaximumRadius();
+            return Math.Exp(-Math.Pow(x, 2) / (Math.Pow(deltaCMax, 2) / countNeurons));
         }
     }
 }

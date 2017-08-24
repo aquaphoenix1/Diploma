@@ -12,8 +12,9 @@ namespace ApproximationHRBF
         public FormMain()
         {
             InitializeComponent();
-            chartHystogram.Series["Идеальное значение"].ChartType = SeriesChartType.Line;
-            chartHystogram.Series["Значение сети"].ChartType = SeriesChartType.Line;
+            chartHystogram.Series["Выборка"].ChartType = SeriesChartType.Line;
+            chartHystogram.Series["После обучения"].ChartType = SeriesChartType.Line;
+            chartHystogram.Series["Исходное значение"].ChartType = SeriesChartType.Line;
             chartHystogram.Series["Полученное значение"].ChartType = SeriesChartType.Line;
         }
 
@@ -32,8 +33,8 @@ namespace ApproximationHRBF
 
         private double[] arrayDistribution = null;
 
-        private double[] arrayOfX;
-        private double[] arrayOfY;
+        private double[] arrayOfX,
+            arrayOfY;
         private int countIntervals;
 
         public void Generate(Distribution distribution, int countIntervals)
@@ -62,7 +63,7 @@ namespace ApproximationHRBF
             for (int i = 0; i < countIntervals; i++)
                 arrayOfY[i] /= arrayDistribution.Length;
 
-            chartHystogram.Series["Идеальное значение"].Points.DataBindXY(arrayOfX, arrayOfY);
+            chartHystogram.Series["Выборка"].Points.DataBindXY(arrayOfX, arrayOfY);
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
@@ -137,12 +138,12 @@ namespace ApproximationHRBF
 
         private void SetNewValue(double[] arrayX, double[] arrayY)
         {
-            chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["Идеальное значение"].Points.DataBindXY(arrayX, arrayY); });
+            //chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["После обучения"].Points.DataBindXY(arrayX, arrayY); });
         }
 
         private void SetNewValue(double[] arrayX, double[] arrayY, double[] arrayOfValues)
         {
-            chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["Значение сети"].Points.DataBindXY(arrayX, arrayY); });
+            chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["Исходное значение"].Points.DataBindXY(arrayX, arrayY); });
             chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["Полученное значение"].Points.DataBindXY(arrayX, arrayOfValues); });
         }
 
@@ -160,9 +161,8 @@ namespace ApproximationHRBF
 
         private void Learn()
         {
-            network.Learning(countLearningItterations, countIntervals, learningCoefficient, error, momentum, arrayOfX, arrayOfY);
-            SetNewValue(arrayOfX, arrayOfY);
-            //switchButtons(true);
+            network.Learning(countLearningItterations, learningCoefficient, error, momentum, arrayOfX, arrayOfY);
+            switchButtons(true);
         }
 
         private double[] DistributeLoad(out double[] arrayOfDistributedX)
@@ -212,12 +212,11 @@ namespace ApproximationHRBF
                     values = new double[arrayOfLoadX.Length];
                     for (int i = 0; i < arrayOfLoadX.Length; i++)
                     {
-                        double gaussian = network.Layers[1].Compute(i, arrayOfLoadX[i]);
-                        double value = gaussian * network.Layers[1].Neurons[i].Weight;
+                        double value = network.outputValue(arrayOfLoadX[i]);
                         values[i] = value;
                         error += System.Math.Pow(value - arrayOfY[i], 2) / (countIntervals - 1);
                     }
-                    errors.Add(error);
+                    errors.Add(Math.Sqrt(error));
                     SetNewValue(arrayOfLoadX, arrayOfLoadY, values);
                     var result = MessageBox.Show("Загрузить следующий?", "Работоспособность сети", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (result == DialogResult.No)
@@ -226,21 +225,23 @@ namespace ApproximationHRBF
                 else break;
             }
 
-            errors.Sort();
-            try
+            if (errors.Count > 0)
             {
-                textBox1.Invoke((MethodInvoker)delegate { textBox1.Text = errors.ToArray()[errors.Count - 1].ToString(); });
+                errors.Sort();
+                try
+                {
+                    textBox1.Invoke((MethodInvoker)delegate { textBox1.Text = errors.ToArray()[errors.Count - 1].ToString(); });
+                }
+                catch { }
             }
-            catch { }
-
         }
 
         private void обучитьСетьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            switchButtons(false);
+            /*switchButtons(false);
             learningThread = new Task(Learn);
-            learningThread.Start();
-            switchButtons(true);
+            learningThread.Start();*/
+            Learn();
         }
 
         private void switchButtons(bool switcher)

@@ -115,43 +115,43 @@ namespace ApproximationHRBF
                 int count;
                 textBox1.Text = textBox1.Text.Replace('.', ',');
                 textBox2.Text = textBox2.Text.Replace('.', ',');
-                if (Int16.Parse(textBoxCount.Text) < 2000) textBoxCount.Text = "2000";
-                if ((count = Int16.Parse(textBoxCountCloset.Text)) < 10) { textBoxCountCloset.Text = "10"; count = 10; }
+                if (Int64.Parse(textBoxCount.Text) < 2000) textBoxCount.Text = "2000";
+                if ((count = Int32.Parse(textBoxCountCloset.Text)) < 10) { textBoxCountCloset.Text = "10"; count = 10; }
                 switch (comboBoxDistribution.SelectedItem.ToString())
                 {
                     case "Арксинус":
                         {
-                            formMain.Generate(new Arcsinus(Double.Parse(textBox1.Text), Int16.Parse(textBoxCount.Text)), count);
+                            formMain.Generate(new Arcsinus(Double.Parse(textBox1.Text), Int32.Parse(textBoxCount.Text)), count);
                             closeForm();
                             break;
                         }
                     case "Экспоненциальное":
                         {
-                            formMain.Generate(new ExponentialOneway(Double.Parse(textBox1.Text), Int16.Parse(textBoxCount.Text)), count);
+                            formMain.Generate(new ExponentialOneway(Double.Parse(textBox1.Text), Int32.Parse(textBoxCount.Text)), count);
                             closeForm();
                             break;
                         }
                     case "Лаплас":
                         {
-                            formMain.Generate(new Laplas(Double.Parse(textBox1.Text), Double.Parse(textBox2.Text), Int16.Parse(textBoxCount.Text)), count);
+                            formMain.Generate(new Laplas(Double.Parse(textBox1.Text), Double.Parse(textBox2.Text), Int32.Parse(textBoxCount.Text)), count);
                             closeForm();
                             break;
                         }
                     case "Нормальное":
                         {
-                            formMain.Generate(new Normal(Double.Parse(textBox1.Text), Double.Parse(textBox2.Text), Int16.Parse(textBoxCount.Text)), count);
+                            formMain.Generate(new Normal(Double.Parse(textBox1.Text), Double.Parse(textBox2.Text), Int32.Parse(textBoxCount.Text)), count);
                             closeForm();
                             break;
                         }
                     case "Релей":
                         {
-                            formMain.Generate(new Relei(Double.Parse(textBox1.Text), Int16.Parse(textBoxCount.Text)), count);
+                            formMain.Generate(new Relei(Double.Parse(textBox1.Text), Int32.Parse(textBoxCount.Text)), count);
                             closeForm();
                             break;
                         }
                     case "Симпсон":
                         {
-                            formMain.Generate(new Simpson(Double.Parse(textBox1.Text), Double.Parse(textBox2.Text), Int16.Parse(textBoxCount.Text)), count);
+                            formMain.Generate(new Simpson(Double.Parse(textBox1.Text), Double.Parse(textBox2.Text), Int32.Parse(textBoxCount.Text)), count);
                             closeForm();
                             break;
                         }
