@@ -8,7 +8,6 @@ namespace ApproximationHRBF
         public int LayersCount { get; set; }
         public static Layer[] Layers { get; set; }
 
-
         public Network(int countHideNeurons)
         {
             this.LayersCount = 3;
@@ -31,7 +30,8 @@ namespace ApproximationHRBF
         public void InitializeHideNeurons(double[] arrayOfX)
         {
             for (int i = 0; i < arrayOfX.Length; i++)
-                Layers[1].InitNeuron(i, new System.Random().NextDouble(), arrayOfX[i]);
+                //Layers[1].InitNeuron(i, new System.Random().NextDouble(), arrayOfX[i]);
+                Layers[1].InitNeuron(i, 0.5 * (new System.Random().NextDouble() * 2 - 1), arrayOfX[i]);
             Layers[1].InitRadius(MaximumRadius() / System.Math.Sqrt(2 * arrayOfX.Length));
         }
 
@@ -65,8 +65,8 @@ namespace ApproximationHRBF
                     Layers[1].Neurons[i].RecalculateWeight(learningCoefficient, difference, arrayOfX[i]);
                     Layers[1].Neurons[i].RecalculateCenter(learningCoefficient, difference, arrayOfX[i]);
                     Layers[1].Neurons[i].RecalculateRadius(learningCoefficient, difference, arrayOfX[i]);
-                    if (err <= error)
-                        return true;
+                    //if (err <= error)
+                        //return true;
                 }
             return false;
         }

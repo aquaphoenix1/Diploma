@@ -60,10 +60,43 @@ namespace ApproximationHRBF
 
         private double middleOfXForCenter = 0;
 
+        private bool CorrectingArray(double[] arrX, double[] arrY, out List<double> XList, out List<double> YList, double step)
+        {
+            bool isEnd = true;
+            XList = new List<double>();
+            YList = new List<double>();
+            for (int i = 0; i < arrY.Length - 2; )
+                if (arrY[i] > 0.01)
+                {
+                    XList.Add(arrX[i]);
+                    YList.Add(arrY[i]);
+                    i++;
+                }
+                else
+                {
+                    isEnd = false;
+                    XList.Add(arrX[i] + step);
+                    YList.Add(arrY[i] + arrY[i + 1]);
+                    i += 2;
+                }
+
+            /*if (arrY[arrY.Length - 1] < 0.01)
+            {
+                XList[XList.Count - 1] += step;
+                YList[YList.Count - 1] += arrY[arrY.Length - 1];
+            }
+            else*/
+            {
+                XList.Add(arrX[arrX.Length - 1]);
+                YList.Add(arrY[arrY.Length - 1]);
+            }
+
+            return isEnd;
+        }
+
         public void Generate(Distribution distribution, int countIntervals)
         {
             arrayDistribution = distribution.Generate();
-            this.countIntervals = countIntervals;
             Array.Sort(arrayDistribution);
             arrayOfX = new double[countIntervals];
             arrayOfY = new double[countIntervals];
@@ -85,7 +118,22 @@ namespace ApproximationHRBF
                     }
             arrayOfY[arrayOfY.Length - 1] = arrayDistribution.Length - sum;
             for (int i = 0; i < countIntervals; i++)
-                arrayOfY[i] /= (arrayDistribution.Length * step);
+                arrayOfY[i] /= arrayDistribution.Length;
+
+            List<double> newArrX, newArrY;
+            while(!CorrectingArray(arrayOfX, arrayOfY, out newArrX, out newArrY, step))
+            {
+                arrayOfX = newArrX.ToArray();
+                arrayOfY = newArrY.ToArray();
+            }
+
+            arrayOfX = newArrX.ToArray();
+            arrayOfY = newArrY.ToArray();
+
+            this.countIntervals = arrayOfX.Length;
+            for (int i = 0; i < arrayOfY.Length; i++)
+                arrayOfY[i] /= step;
+
             MiniMax(arrayOfY);
             //chartHystogram.Series["Выборка"].Points.DataBindXY(arrayOfX, arrayOfY);
         }
