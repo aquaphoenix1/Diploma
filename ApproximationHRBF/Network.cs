@@ -25,60 +25,58 @@ namespace ApproximationHRBF
             for (int i = 1; i < Layers[1].CountNeurons; i++)
                 if ((val = Layers[1].Neurons[i].Center - Layers[1].Neurons[i-1].Center) > max)
                     max = val;
-            /*double max = array[1] - array[0];
-            double val;
-            for (int i = 1; i < array.Length; i++)
-                if ((val = array[i] - array[i - 1]) > max)
-                    max = val;*/
             return max;
         }
 
         public void InitializeHideNeurons(double[] arrayOfX)
         {
-            double radius = MaximumRadius() / System.Math.Sqrt(2 * arrayOfX.Length);
-            //double radius = MaximumRadius(arrayOfX);
             for (int i = 0; i < arrayOfX.Length; i++)
-                //Layers[1].InitNeuron(i, 0.5 * (new System.Random().NextDouble() * 2 - 1), radius, arrayOfX[i]);
-                Layers[1].InitNeuron(i, new System.Random().NextDouble(), radius, arrayOfX[i]);
+                Layers[1].InitNeuron(i, new System.Random().NextDouble(), arrayOfX[i]);
+            Layers[1].InitRadius(MaximumRadius() / System.Math.Sqrt(2 * arrayOfX.Length));
         }
 
         public double outputValue(double inputX)
         {
             double sum = 0;
-            for (int i = 0; i < Layers[1].CountNeurons; i++)
-                sum += Layers[1].Neurons[i].Weight * Layers[1].Compute(i, inputX, Layers[1].CountNeurons);
+                for (int j = 0; j < Layers[1].CountNeurons; j++)
+                    sum += Layers[1].Neurons[j].Weight * Layers[1].Neurons[j].Compute(inputX);
             return sum;
         }
 
-        private double calculateError(double[] inputX, double[] arrayOfY)
+        private double calculateError(double inputX, double inputY)
         {
             double sum = 0;
-            for (int i = 0; i < Layers[1].CountNeurons; i++)
-                sum += Layers[1].Neurons[i].Weight * Layers[1].Compute(i, inputX[i], Layers[1].CountNeurons) - arrayOfY[i];
-            sum = Math.Pow(sum, 2);
-            sum /= 2;
+                for (int j = 0; j < Layers[1].CountNeurons; j++)
+                    sum += Layers[1].Neurons[j].Weight * Layers[1].Neurons[j].Compute(inputX);
+                sum = Math.Pow(sum - inputY, 2) / 2;
             return sum;
+        }
+
+        private bool Epoch(double[] arrayOfX, double[] arrayOfY, double error, double learningCoefficient)
+        {
+            double err;
+            for (int i = 0; i < arrayOfX.Length; i++)
+                {
+                    double y = outputValue(arrayOfX[i]);
+                    err = calculateError(arrayOfX[i], arrayOfY[i]);
+
+                    double difference = y - arrayOfY[i];
+
+                    Layers[1].Neurons[i].RecalculateWeight(learningCoefficient, difference, arrayOfX[i]);
+                    Layers[1].Neurons[i].RecalculateCenter(learningCoefficient, difference, arrayOfX[i]);
+                    Layers[1].Neurons[i].RecalculateRadius(learningCoefficient, difference, arrayOfX[i]);
+                    if (err <= error)
+                        return true;
+                }
+            return false;
         }
 
         public void Learning(int countItterations, double learningCoefficient, double error, double momentum, double[] arrayOfX, double[] arrayOfY)
         {
             int j = 0;
-            double err = Double.MaxValue;
-            while (j < countItterations && err > error)
-            {
-                err = 0;
-                for (int i = 0; i < arrayOfX.Length; i++)
-                {
-                    double gaussian = Layers[1].Compute(i, arrayOfX[i], Layers[1].CountNeurons);
-                    double value = outputValue(arrayOfX[i]);
-
-                    Layers[1].RecalculateWeight(i, arrayOfX, arrayOfY[i], gaussian, learningCoefficient);
-                    Layers[1].RecalculateCenter(i, learningCoefficient, value, arrayOfY[i], Layers[1].Neurons[i].Weight, arrayOfX[i], Layers[1].Neurons[i].Center, Layers[1].Neurons[i].Radius);
-                    Layers[1].RecalculateRadius(i, learningCoefficient, value, arrayOfY[i], Layers[1].Neurons[i].Weight, arrayOfX[i], Layers[1].Neurons[i].Center, Layers[1].Neurons[i].Radius);
-                }
-                j++;
-                err = calculateError(arrayOfX, arrayOfY);
-            }
+            while (j++ < countItterations)
+                if (Epoch(arrayOfX, arrayOfY, error, learningCoefficient))
+                    break;
         }
     }
 }

@@ -37,6 +37,29 @@ namespace ApproximationHRBF
             arrayOfY;
         private int countIntervals;
 
+        private double FindMinAndMax(double[] array, out double max)
+        {
+            double min = array[0];
+            max = array[0];
+            for (int i = 1; i < array.Length; i++)
+                if (array[i] > max)
+                    max = array[i];
+                else if (array[i] < min)
+                    min = array[i];
+            return min;
+        }
+
+        private void MiniMax(double[] array)
+        {
+            double max;
+            double min = FindMinAndMax(array, out max);
+            double difference = max - min;
+            for (int i = 0; i < array.Length; i++)
+                array[i] = (array[i] - min) / difference;
+        }
+
+        private double middleOfXForCenter = 0;
+
         public void Generate(Distribution distribution, int countIntervals)
         {
             arrayDistribution = distribution.Generate();
@@ -47,6 +70,7 @@ namespace ApproximationHRBF
             double minX = arrayDistribution[0];
             double maxX = arrayDistribution[arrayDistribution.Length - 1];
             double step = (maxX - minX) / countIntervals;
+            middleOfXForCenter = step / 2.0;
             arrayOfX[0] = minX;
             int sum = 0;
             for (int i = 1; i < countIntervals; i++)
@@ -61,9 +85,9 @@ namespace ApproximationHRBF
                     }
             arrayOfY[arrayOfY.Length - 1] = arrayDistribution.Length - sum;
             for (int i = 0; i < countIntervals; i++)
-                arrayOfY[i] /= arrayDistribution.Length;
-
-            chartHystogram.Series["Выборка"].Points.DataBindXY(arrayOfX, arrayOfY);
+                arrayOfY[i] /= (arrayDistribution.Length * step);
+            MiniMax(arrayOfY);
+            //chartHystogram.Series["Выборка"].Points.DataBindXY(arrayOfX, arrayOfY);
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
@@ -136,26 +160,11 @@ namespace ApproximationHRBF
             learnNetworkToolStripMenuItem.Visible = true;
         }
 
-        private void SetNewValue(double[] arrayX, double[] arrayY)
-        {
-            //chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["После обучения"].Points.DataBindXY(arrayX, arrayY); });
-        }
-
         private void SetNewValue(double[] arrayX, double[] arrayY, double[] arrayOfValues)
         {
             chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["Исходное значение"].Points.DataBindXY(arrayX, arrayY); });
             chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["Полученное значение"].Points.DataBindXY(arrayX, arrayOfValues); });
         }
-
-        /*double gaussian = network.Layers[1].Compute(i, arrayOfX[i]);
-                    double value = gaussian * network.Layers[1].Neurons[i].Weight;
-                    err += System.Math.Pow(value - arrayOfY[i], 2) / (countIntervals - 1);
-                    network.Layers[1].one(i, learningCoefficient, this.network.Layers[1].CalculateSumOfFunctions(arrayOfX, i), arrayOfY[i], value);
-                    network.Layers[1].two(i, learningCoefficient, arrayOfY[i], value, this.network.Layers[1].CalculateSumOfFunctions(arrayOfX, i), arrayOfX[i]);
-                    network.Layers[1].three(i, learningCoefficient, arrayOfY[i], value, this.network.Layers[1].CalculateSumOfFunctions(arrayOfX, i), arrayOfX[i]);
-                    gaussian = network.Layers[1].Compute(i, arrayOfX[i]);
-                    value = gaussian * network.Layers[1].Neurons[i].Weight;
-                    arrayOfY[i] = value;*/
 
         Task learningThread;
 
@@ -187,7 +196,8 @@ namespace ApproximationHRBF
                     }
             arrayOfYBad[arrayOfYBad.Length - 1] = arrayDistribution.Length - sum;
             for (int i = 0; i < countIntervals; i++)
-                arrayOfYBad[i] /= arrayDistribution.Length;
+                arrayOfYBad[i] /= (arrayDistribution.Length * step);
+            MiniMax(arrayOfYBad);
             arrayOfDistributedX = arrayOfBadX;
             return arrayOfYBad;
         }
