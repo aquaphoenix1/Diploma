@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.Collections.Generic;
+
 namespace ApproximationHRBF
 {
     class Network
@@ -44,17 +46,15 @@ namespace ApproximationHRBF
 
         private double calculateError(double inputX, double inputY)
         {
-            double sum = 0;
-            for (int j = 0; j < Layers[1].CountNeurons; j++)
-                sum += Layers[1].Neurons[j].Weight * Layers[1].Neurons[j].Compute(inputX);
-            sum = Math.Pow(sum - inputY, 2) / 2;
-            return sum;
+            //double sum = 0;
+            /*for (int j = 0; j < Layers[1].CountNeurons; j++)
+                sum += Layers[1].Neurons[j].Weight * Layers[1].Neurons[j].Compute(inputX);*/
+            return Math.Pow(outputValue(inputX) - inputY, 2) / 2;
         }
 
-        private bool Epoch(double[] arrayOfX, double[] arrayOfY, double error, double learningCoefficient)
+        private bool Epoch(double[] arrayOfX, double[] arrayOfY, double error, double learningCoefficient, out double err)
         {
-            double err;
-
+            err = 0;
             //
             double[] mas = new double[arrayOfX.Length];
             //
@@ -67,30 +67,36 @@ namespace ApproximationHRBF
                 mas[i] = y;
                 //
 
-                err = calculateError(arrayOfX[i], arrayOfY[i]);
+                err += calculateError(arrayOfX[i], arrayOfY[i]);
 
                 double difference = y - arrayOfY[i];
 
                 Layers[1].Neurons[i].RecalculateWeight(learningCoefficient, difference, arrayOfX[i]);
                 Layers[1].Neurons[i].RecalculateCenter(learningCoefficient, difference, arrayOfX[i]);
                 Layers[1].Neurons[i].RecalculateRadius(learningCoefficient, difference, arrayOfX[i]);
-                //if (err <= error)
-                //return true;
             }
             FormMain.Set(arrayOfX, mas);
-            return false;
+            return (err <= error);
         }
 
         public void Learning(int countItterations, double learningCoefficient, double error, double momentum, double[] arrayOfX, double[] arrayOfY, FormMain form)
         {
+            List<double> errorsList = new List<double>();
+            List<int> XList = new List<int>();
             int j = 0;
+            double err;
             while (j++ < countItterations)
             {
-                if (Epoch(arrayOfX, arrayOfY, error, learningCoefficient))
+                if (Epoch(arrayOfX, arrayOfY, error, learningCoefficient, out err))
                     break;
                 form.SetCurrentIteration(j);
+                form.SetCurrentError(err);
+                errorsList.Add(err);
+                XList.Add(j);
             }
             form.SwitchButtons(true);
+            form.ChangeTextBoxCurrentIterationAndError(false);
+            form.DrawError(errorsList.ToArray(), XList.ToArray());
         }
     }
 }

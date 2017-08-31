@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -225,6 +224,21 @@ namespace ApproximationHRBF
             });
         }
 
+        public void SetCurrentError(double error)
+        {
+            form.Invoke((MethodInvoker)delegate
+            {
+                textBoxCurrentError.Text = error.ToString();
+            });
+        }
+
+        public void DrawError(double[] errors, int[] massX)
+        {
+            if (MessageBox.Show("Показать график ошибки обучения?", "Ошибка обучения", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                new FormError(errors, massX).ShowDialog();
+            }
+        }
         private void SetNewValue(double[] arrayX, double[] arrayY, double[] arrayOfValues)
         {
             chartHystogram.Series["Исходное значение"].Points.DataBindXY(arrayX, arrayY);
@@ -262,14 +276,14 @@ namespace ApproximationHRBF
         private void Compute()
         {
             List<double> errors = new List<double>();
-                double[] arrayOfLoadX,
-                arrayOfLoadY, 
-                values;
-                int j = 0;
-                double error;
-                bool isLoad;
+            double[] arrayOfLoadX,
+            arrayOfLoadY,
+            values;
+            int j = 0;
+            double error;
+            bool isLoad;
 
-            while(true)
+            while (true)
             {
                 error = 0;
                 isLoad = Download();
@@ -281,7 +295,7 @@ namespace ApproximationHRBF
                     {
                         double value = network.outputValue(arrayOfLoadX[i]);
                         values[i] = value;
-                        error += System.Math.Pow(value - arrayOfY[i], 2) / (countIntervals - 1);
+                        error += Math.Pow(value - arrayOfY[i], 2) / (countIntervals - 1);
                     }
                     errors.Add(Math.Sqrt(error));
                     SetNewValue(arrayOfLoadX, arrayOfLoadY, values);
@@ -303,14 +317,24 @@ namespace ApproximationHRBF
             }
         }
 
-        private void ChangeTextBoxCurrentIteration(bool switcher)
+        public void ChangeTextBoxCurrentIterationAndError(bool switcher)
         {
-            textBoxCurrentIteration.Visible = switcher;
-            textBoxCurrentIteration.Text = "0";
-            textBoxCurrentIteration.Enabled = switcher;
+            form.Invoke((MethodInvoker)delegate ()
+            {
+                textBoxCurrentIteration.Visible = switcher;
+                textBoxCurrentIteration.Text = "0";
+                textBoxCurrentIteration.Enabled = switcher;
 
-            labelCurrentIteration.Enabled = switcher;
-            labelCurrentIteration.Visible = switcher;
+                labelCurrentIteration.Enabled = switcher;
+                labelCurrentIteration.Visible = switcher;
+
+                labelCurrentError.Enabled = switcher;
+                labelCurrentError.Visible = switcher;
+
+                textBoxCurrentError.Enabled = switcher;
+                textBoxCurrentError.Text = "0";
+                textBoxCurrentError.Visible = switcher;
+            });
         }
 
         private Thread learningThread;
@@ -323,51 +347,46 @@ namespace ApproximationHRBF
             }
             );
 
-            form.Invoke((MethodInvoker)delegate
-            {
-                form.SwitchButtons(false);
-            });
-
-            //SwitchButtons(false);
-            ChangeTextBoxCurrentIteration(true);
+            SwitchButtons(false);
+            ChangeTextBoxCurrentIterationAndError(true);
             learningThread.Start();
         }
 
         public void SwitchButtons(bool switcher)
         {
-            stopLearningToolStripMenuItem.Enabled = !switcher;
-            stopLearningToolStripMenuItem.Visible = !switcher;
+            form.Invoke((MethodInvoker)delegate ()
+            {
+                stopLearningToolStripMenuItem.Enabled = !switcher;
+                stopLearningToolStripMenuItem.Visible = !switcher;
 
-            learnNetworkToolStripMenuItem.Enabled = switcher;
-            learnNetworkToolStripMenuItem.Visible = switcher;
+                learnNetworkToolStripMenuItem.Enabled = switcher;
+                learnNetworkToolStripMenuItem.Visible = switcher;
 
-            fileToolStripMenuItem.Enabled = switcher;
-            fileToolStripMenuItem.Visible = switcher;
+                fileToolStripMenuItem.Enabled = switcher;
+                fileToolStripMenuItem.Visible = switcher;
 
-            generatorToolStripMenuItem.Enabled = switcher;
-            generatorToolStripMenuItem.Visible = switcher;
+                generatorToolStripMenuItem.Enabled = switcher;
+                generatorToolStripMenuItem.Visible = switcher;
 
-            networkParametrsToolStripMenuItem.Enabled = switcher;
-            networkParametrsToolStripMenuItem.Visible = switcher;
+                networkParametrsToolStripMenuItem.Enabled = switcher;
+                networkParametrsToolStripMenuItem.Visible = switcher;
 
-            testNetworkToolStripMenuItem.Enabled = switcher;
-            testNetworkToolStripMenuItem.Visible = switcher;
+                testNetworkToolStripMenuItem.Enabled = switcher;
+                testNetworkToolStripMenuItem.Visible = switcher;
+            });
         }
 
         private void остановитьОбучениеToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            form.Invoke((MethodInvoker)delegate
-            {
-                form.SwitchButtons(true);
-            });
-            //SwitchButtons(true);
-            ChangeTextBoxCurrentIteration(false);
+            SwitchButtons(true);
+            ChangeTextBoxCurrentIterationAndError(false);
             learningThread.Abort();
         }
 
         private void тестСетиToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //new Thread(() => Compute()).Start();
+            chartHystogram.Series[4].Points.Clear();
             Compute();
         }
 
@@ -393,6 +412,12 @@ namespace ApproximationHRBF
 
             textBoxCurrentIteration.Enabled = false;
             textBoxCurrentIteration.Visible = false;
+
+            labelCurrentError.Enabled = false;
+            labelCurrentError.Visible = false;
+
+            textBoxCurrentError.Enabled = false;
+            textBoxCurrentError.Visible = false;
         }
     }
 }

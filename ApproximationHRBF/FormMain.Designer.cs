@@ -47,6 +47,8 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBoxCurrentIteration = new System.Windows.Forms.TextBox();
             this.labelCurrentIteration = new System.Windows.Forms.Label();
+            this.textBoxCurrentError = new System.Windows.Forms.TextBox();
+            this.labelCurrentError = new System.Windows.Forms.Label();
             this.menuStripMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartHystogram)).BeginInit();
             this.SuspendLayout();
@@ -176,11 +178,30 @@
             this.labelCurrentIteration.TabIndex = 5;
             this.labelCurrentIteration.Text = "Текущая итерация";
             // 
+            // textBoxCurrentError
+            // 
+            this.textBoxCurrentError.Location = new System.Drawing.Point(403, 190);
+            this.textBoxCurrentError.Name = "textBoxCurrentError";
+            this.textBoxCurrentError.Size = new System.Drawing.Size(100, 20);
+            this.textBoxCurrentError.TabIndex = 6;
+            // 
+            // labelCurrentError
+            // 
+            this.labelCurrentError.AutoSize = true;
+            this.labelCurrentError.BackColor = System.Drawing.Color.White;
+            this.labelCurrentError.Location = new System.Drawing.Point(403, 171);
+            this.labelCurrentError.Name = "labelCurrentError";
+            this.labelCurrentError.Size = new System.Drawing.Size(93, 13);
+            this.labelCurrentError.TabIndex = 7;
+            this.labelCurrentError.Text = "Текущая ошибка";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(669, 502);
+            this.Controls.Add(this.labelCurrentError);
+            this.Controls.Add(this.textBoxCurrentError);
             this.Controls.Add(this.labelCurrentIteration);
             this.Controls.Add(this.textBoxCurrentIteration);
             this.Controls.Add(this.textBox1);
@@ -214,6 +235,8 @@
         private System.Windows.Forms.ToolStripMenuItem testNetworkToolStripMenuItem;
         private System.Windows.Forms.TextBox textBoxCurrentIteration;
         private System.Windows.Forms.Label labelCurrentIteration;
+        private System.Windows.Forms.TextBox textBoxCurrentError;
+        private System.Windows.Forms.Label labelCurrentError;
     }
 }
 
