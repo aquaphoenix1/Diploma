@@ -22,7 +22,7 @@ namespace ApproximationHRBF
             double max = Layers[1].Neurons[1].Center - Layers[1].Neurons[0].Center;
             double val;
             for (int i = 1; i < Layers[1].CountNeurons; i++)
-                if ((val = Layers[1].Neurons[i].Center - Layers[1].Neurons[i-1].Center) > max)
+                if ((val = Layers[1].Neurons[i].Center - Layers[1].Neurons[i - 1].Center) > max)
                     max = val;
             return max;
         }
@@ -38,36 +38,47 @@ namespace ApproximationHRBF
         public double outputValue(double inputX)
         {
             double sum = 0;
-                for (int j = 0; j < Layers[1].CountNeurons; j++)
-                    sum += Layers[1].Neurons[j].Weight * Layers[1].Neurons[j].Compute(inputX);
+            for (int j = 0; j < Layers[1].CountNeurons; j++)
+                sum += Layers[1].Neurons[j].Weight * Layers[1].Neurons[j].Compute(inputX);
             return sum;
         }
 
         private double calculateError(double inputX, double inputY)
         {
             double sum = 0;
-                for (int j = 0; j < Layers[1].CountNeurons; j++)
-                    sum += Layers[1].Neurons[j].Weight * Layers[1].Neurons[j].Compute(inputX);
-                sum = Math.Pow(sum - inputY, 2) / 2;
+            for (int j = 0; j < Layers[1].CountNeurons; j++)
+                sum += Layers[1].Neurons[j].Weight * Layers[1].Neurons[j].Compute(inputX);
+            sum = Math.Pow(sum - inputY, 2) / 2;
             return sum;
         }
 
         private bool Epoch(double[] arrayOfX, double[] arrayOfY, double error, double learningCoefficient)
         {
             double err;
+
+            //
+            double[] mas = new double[arrayOfX.Length];
+            //
+
             for (int i = 0; i < arrayOfX.Length; i++)
-                {
-                    double y = outputValue(arrayOfX[i]);
-                    err = calculateError(arrayOfX[i], arrayOfY[i]);
+            {
+                double y = outputValue(arrayOfX[i]);
 
-                    double difference = y - arrayOfY[i];
+                //
+                mas[i] = y;
+                //
 
-                    Layers[1].Neurons[i].RecalculateWeight(learningCoefficient, difference, arrayOfX[i]);
-                    Layers[1].Neurons[i].RecalculateCenter(learningCoefficient, difference, arrayOfX[i]);
-                    Layers[1].Neurons[i].RecalculateRadius(learningCoefficient, difference, arrayOfX[i]);
-                    //if (err <= error)
-                        //return true;
-                }
+                err = calculateError(arrayOfX[i], arrayOfY[i]);
+
+                double difference = y - arrayOfY[i];
+
+                Layers[1].Neurons[i].RecalculateWeight(learningCoefficient, difference, arrayOfX[i]);
+                Layers[1].Neurons[i].RecalculateCenter(learningCoefficient, difference, arrayOfX[i]);
+                Layers[1].Neurons[i].RecalculateRadius(learningCoefficient, difference, arrayOfX[i]);
+                //if (err <= error)
+                //return true;
+            }
+            FormMain.set(arrayOfX, mas, mas);
             return false;
         }
 

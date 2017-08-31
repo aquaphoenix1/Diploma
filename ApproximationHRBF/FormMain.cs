@@ -16,6 +16,7 @@ namespace ApproximationHRBF
             chartHystogram.Series["После обучения"].ChartType = SeriesChartType.Line;
             chartHystogram.Series["Исходное значение"].ChartType = SeriesChartType.Line;
             chartHystogram.Series["Полученное значение"].ChartType = SeriesChartType.Line;
+            form = this;
         }
 
         private void generatorToolStripMenuItem_Click(object sender, EventArgs e)
@@ -59,7 +60,7 @@ namespace ApproximationHRBF
         }
 
         private double middleOfXForCenter = 0;
-
+        
         private bool CorrectingArray(double[] arrX, double[] arrY, out List<double> XList, out List<double> YList, double step)
         {
             bool isEnd = true;
@@ -208,18 +209,28 @@ namespace ApproximationHRBF
             learnNetworkToolStripMenuItem.Visible = true;
         }
 
+        static FormMain form;
+        public static void set(double[] arrayX, double[] arrayY, double[] arrayOfValues)
+        {
+            form.Invoke((MethodInvoker)delegate {
+                form.SetNewValue(arrayX, arrayY, arrayOfValues);
+            });
+        }
+
         private void SetNewValue(double[] arrayX, double[] arrayY, double[] arrayOfValues)
         {
-            chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["Исходное значение"].Points.DataBindXY(arrayX, arrayY); });
-            chartHystogram.Invoke((MethodInvoker)delegate { chartHystogram.Series["Полученное значение"].Points.DataBindXY(arrayX, arrayOfValues); });
+                chartHystogram.Series["Исходное значение"].Points.DataBindXY(arrayX, arrayY);
+                chartHystogram.Series["Полученное значение"].Points.DataBindXY(arrayX, arrayOfValues);
         }
 
         Task learningThread;
 
         private void Learn()
         {
-            network.Learning(countLearningItterations, learningCoefficient, error, momentum, arrayOfX, arrayOfY);
-            switchButtons(true);
+            new Thread( () => {
+                network.Learning(countLearningItterations, learningCoefficient, error, momentum, arrayOfX, arrayOfY);
+                switchButtons(true); }
+            ).Start();
         }
 
         private double[] DistributeLoad(out double[] arrayOfDistributedX)
