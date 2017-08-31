@@ -45,6 +45,8 @@
             this.testNetworkToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chartHystogram = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBoxCurrentIteration = new System.Windows.Forms.TextBox();
+            this.labelCurrentIteration = new System.Windows.Forms.Label();
             this.menuStripMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartHystogram)).BeginInit();
             this.SuspendLayout();
@@ -70,55 +72,55 @@
             this.downloadToolStripMenuItem,
             this.saveToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
             this.fileToolStripMenuItem.Text = "Файл";
             // 
             // downloadToolStripMenuItem
             // 
             this.downloadToolStripMenuItem.Name = "downloadToolStripMenuItem";
-            this.downloadToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.downloadToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
             this.downloadToolStripMenuItem.Text = "Загрузить выборку";
             this.downloadToolStripMenuItem.Click += new System.EventHandler(this.downloadToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
             this.saveToolStripMenuItem.Text = "Сохранить выборку";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // generatorToolStripMenuItem
             // 
             this.generatorToolStripMenuItem.Name = "generatorToolStripMenuItem";
-            this.generatorToolStripMenuItem.Size = new System.Drawing.Size(76, 20);
+            this.generatorToolStripMenuItem.Size = new System.Drawing.Size(73, 20);
             this.generatorToolStripMenuItem.Text = "Генератор";
             this.generatorToolStripMenuItem.Click += new System.EventHandler(this.generatorToolStripMenuItem_Click);
             // 
             // networkParametrsToolStripMenuItem
             // 
             this.networkParametrsToolStripMenuItem.Name = "networkParametrsToolStripMenuItem";
-            this.networkParametrsToolStripMenuItem.Size = new System.Drawing.Size(110, 20);
+            this.networkParametrsToolStripMenuItem.Size = new System.Drawing.Size(102, 20);
             this.networkParametrsToolStripMenuItem.Text = "Параметры сети";
             this.networkParametrsToolStripMenuItem.Click += new System.EventHandler(this.networkParametrsToolStripMenuItem_Click);
             // 
             // learnNetworkToolStripMenuItem
             // 
             this.learnNetworkToolStripMenuItem.Name = "learnNetworkToolStripMenuItem";
-            this.learnNetworkToolStripMenuItem.Size = new System.Drawing.Size(92, 20);
+            this.learnNetworkToolStripMenuItem.Size = new System.Drawing.Size(89, 20);
             this.learnNetworkToolStripMenuItem.Text = "Обучить сеть";
             this.learnNetworkToolStripMenuItem.Click += new System.EventHandler(this.обучитьСетьToolStripMenuItem_Click);
             // 
             // stopLearningToolStripMenuItem
             // 
             this.stopLearningToolStripMenuItem.Name = "stopLearningToolStripMenuItem";
-            this.stopLearningToolStripMenuItem.Size = new System.Drawing.Size(139, 20);
+            this.stopLearningToolStripMenuItem.Size = new System.Drawing.Size(131, 20);
             this.stopLearningToolStripMenuItem.Text = "Остановить обучение";
             this.stopLearningToolStripMenuItem.Click += new System.EventHandler(this.остановитьОбучениеToolStripMenuItem_Click);
             // 
             // testNetworkToolStripMenuItem
             // 
             this.testNetworkToolStripMenuItem.Name = "testNetworkToolStripMenuItem";
-            this.testNetworkToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
+            this.testNetworkToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
             this.testNetworkToolStripMenuItem.Text = "Тест сети";
             this.testNetworkToolStripMenuItem.Click += new System.EventHandler(this.тестСетиToolStripMenuItem_Click);
             // 
@@ -157,11 +159,30 @@
             this.textBox1.Size = new System.Drawing.Size(75, 20);
             this.textBox1.TabIndex = 3;
             // 
+            // textBoxCurrentIteration
+            // 
+            this.textBoxCurrentIteration.Location = new System.Drawing.Point(402, 139);
+            this.textBoxCurrentIteration.Name = "textBoxCurrentIteration";
+            this.textBoxCurrentIteration.Size = new System.Drawing.Size(100, 20);
+            this.textBoxCurrentIteration.TabIndex = 4;
+            // 
+            // labelCurrentIteration
+            // 
+            this.labelCurrentIteration.AutoSize = true;
+            this.labelCurrentIteration.BackColor = System.Drawing.Color.White;
+            this.labelCurrentIteration.Location = new System.Drawing.Point(400, 123);
+            this.labelCurrentIteration.Name = "labelCurrentIteration";
+            this.labelCurrentIteration.Size = new System.Drawing.Size(102, 13);
+            this.labelCurrentIteration.TabIndex = 5;
+            this.labelCurrentIteration.Text = "Текущая итерация";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(669, 502);
+            this.Controls.Add(this.labelCurrentIteration);
+            this.Controls.Add(this.textBoxCurrentIteration);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.chartHystogram);
             this.Controls.Add(this.menuStripMain);
@@ -191,6 +212,8 @@
         private System.Windows.Forms.ToolStripMenuItem learnNetworkToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stopLearningToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem testNetworkToolStripMenuItem;
+        private System.Windows.Forms.TextBox textBoxCurrentIteration;
+        private System.Windows.Forms.Label labelCurrentIteration;
     }
 }
 

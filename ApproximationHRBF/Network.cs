@@ -1,6 +1,5 @@
 ﻿
 using System;
-using System.Collections.Generic;
 namespace ApproximationHRBF
 {
     class Network
@@ -78,16 +77,20 @@ namespace ApproximationHRBF
                 //if (err <= error)
                 //return true;
             }
-            FormMain.set(arrayOfX, mas, mas);
+            FormMain.Set(arrayOfX, mas);
             return false;
         }
 
-        public void Learning(int countItterations, double learningCoefficient, double error, double momentum, double[] arrayOfX, double[] arrayOfY)
+        public void Learning(int countItterations, double learningCoefficient, double error, double momentum, double[] arrayOfX, double[] arrayOfY, FormMain form)
         {
             int j = 0;
             while (j++ < countItterations)
+            {
                 if (Epoch(arrayOfX, arrayOfY, error, learningCoefficient))
                     break;
+                form.SetCurrentIteration(j);
+            }
+            form.SwitchButtons(true);
         }
     }
 }

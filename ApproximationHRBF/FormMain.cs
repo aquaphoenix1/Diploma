@@ -210,27 +210,25 @@ namespace ApproximationHRBF
         }
 
         static FormMain form;
-        public static void set(double[] arrayX, double[] arrayY, double[] arrayOfValues)
+        public static void Set(double[] arrayX, double[] arrayY)
         {
             form.Invoke((MethodInvoker)delegate {
-                form.SetNewValue(arrayX, arrayY, arrayOfValues);
+                form.chartHystogram.Series["После обучения"].Points.DataBindXY(arrayX, arrayY);
+            });
+        }
+
+        public void SetCurrentIteration(int iteration)
+        {
+            form.Invoke((MethodInvoker)delegate
+            {
+                textBoxCurrentIteration.Text = iteration.ToString();
             });
         }
 
         private void SetNewValue(double[] arrayX, double[] arrayY, double[] arrayOfValues)
         {
-                chartHystogram.Series["Исходное значение"].Points.DataBindXY(arrayX, arrayY);
-                chartHystogram.Series["Полученное значение"].Points.DataBindXY(arrayX, arrayOfValues);
-        }
-
-        Task learningThread;
-
-        private void Learn()
-        {
-            new Thread( () => {
-                network.Learning(countLearningItterations, learningCoefficient, error, momentum, arrayOfX, arrayOfY);
-                switchButtons(true); }
-            ).Start();
+            chartHystogram.Series["Исходное значение"].Points.DataBindXY(arrayX, arrayY);
+            chartHystogram.Series["Полученное значение"].Points.DataBindXY(arrayX, arrayOfValues);
         }
 
         private double[] DistributeLoad(out double[] arrayOfDistributedX)
@@ -305,15 +303,37 @@ namespace ApproximationHRBF
             }
         }
 
-        private void обучитьСетьToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ChangeTextBoxCurrentIteration(bool switcher)
         {
-            /*switchButtons(false);
-            learningThread = new Task(Learn);
-            learningThread.Start();*/
-            Learn();
+            textBoxCurrentIteration.Visible = switcher;
+            textBoxCurrentIteration.Text = "0";
+            textBoxCurrentIteration.Enabled = switcher;
+
+            labelCurrentIteration.Enabled = switcher;
+            labelCurrentIteration.Visible = switcher;
         }
 
-        private void switchButtons(bool switcher)
+        private Thread learningThread;
+
+        private void обучитьСетьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            learningThread = new Thread(() =>
+            {
+                network.Learning(countLearningItterations, learningCoefficient, error, momentum, arrayOfX, arrayOfY, this);
+            }
+            );
+
+            form.Invoke((MethodInvoker)delegate
+            {
+                form.SwitchButtons(false);
+            });
+
+            //SwitchButtons(false);
+            ChangeTextBoxCurrentIteration(true);
+            learningThread.Start();
+        }
+
+        public void SwitchButtons(bool switcher)
         {
             stopLearningToolStripMenuItem.Enabled = !switcher;
             stopLearningToolStripMenuItem.Visible = !switcher;
@@ -336,8 +356,13 @@ namespace ApproximationHRBF
 
         private void остановитьОбучениеToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            learningThread.Dispose();
-            switchButtons(true);
+            form.Invoke((MethodInvoker)delegate
+            {
+                form.SwitchButtons(true);
+            });
+            //SwitchButtons(true);
+            ChangeTextBoxCurrentIteration(false);
+            learningThread.Abort();
         }
 
         private void тестСетиToolStripMenuItem_Click(object sender, EventArgs e)
@@ -362,6 +387,12 @@ namespace ApproximationHRBF
 
             testNetworkToolStripMenuItem.Enabled = false;
             testNetworkToolStripMenuItem.Visible = false;
+
+            labelCurrentIteration.Enabled = false;
+            labelCurrentIteration.Visible = false;
+
+            textBoxCurrentIteration.Enabled = false;
+            textBoxCurrentIteration.Visible = false;
         }
     }
 }
