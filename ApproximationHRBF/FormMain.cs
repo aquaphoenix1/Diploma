@@ -33,8 +33,6 @@ namespace ApproximationHRBF
 
         private double[] arrayDistribution = null;
 
-        private double[] arrayOfX,
-            arrayOfY;
         private int countIntervals;
 
         private double FindMinAndMax(double[] array, out double max)
@@ -80,12 +78,12 @@ namespace ApproximationHRBF
                     i += 2;
                 }
 
-            /*if (arrY[arrY.Length - 1] < 0.01)
+            if (arrY[arrY.Length - 1] < 0.01)
             {
                 XList[XList.Count - 1] += step;
                 YList[YList.Count - 1] += arrY[arrY.Length - 1];
             }
-            else*/
+            else
             {
                 XList.Add(arrX[arrX.Length - 1]);
                 YList.Add(arrY[arrY.Length - 1]);
@@ -93,6 +91,9 @@ namespace ApproximationHRBF
 
             return isEnd;
         }
+
+        private double[] arrayOfX,
+            arrayOfY;
 
         public void Generate(Distribution distribution, int countIntervals)
         {
@@ -121,7 +122,8 @@ namespace ApproximationHRBF
                 arrayOfY[i] /= arrayDistribution.Length;
 
             List<double> newArrX, newArrY;
-            while(!CorrectingArray(arrayOfX, arrayOfY, out newArrX, out newArrY, step))
+            //while(!CorrectingArray(arrayOfX, arrayOfY, out newArrX, out newArrY, step))
+            CorrectingArray(arrayOfX, arrayOfY, out newArrX, out newArrY, step);
             {
                 arrayOfX = newArrX.ToArray();
                 arrayOfY = newArrY.ToArray();
@@ -134,7 +136,7 @@ namespace ApproximationHRBF
             for (int i = 0; i < arrayOfY.Length; i++)
                 arrayOfY[i] /= step;
 
-            MiniMax(arrayOfY);
+            //MiniMax(arrayOfY);
             //chartHystogram.Series["Выборка"].Points.DataBindXY(arrayOfX, arrayOfY);
         }
 
@@ -268,10 +270,15 @@ namespace ApproximationHRBF
             arrayOfYBad[arrayOfYBad.Length - 1] = arrayDistribution.Length - sum;
             for (int i = 0; i < countIntervals; i++)
                 arrayOfYBad[i] /= (arrayDistribution.Length * step);
-            MiniMax(arrayOfYBad);
+            //MiniMax(arrayOfYBad);
             arrayOfDistributedX = arrayOfBadX;
             return arrayOfYBad;
         }
+
+        /*private void DeMiniMax(double[] array)
+        {
+
+        }*/
 
         private void Compute()
         {
@@ -295,9 +302,9 @@ namespace ApproximationHRBF
                     {
                         double value = network.outputValue(arrayOfLoadX[i]);
                         values[i] = value;
-                        error += Math.Pow(value - arrayOfY[i], 2) / (countIntervals - 1);
+                        error += Math.Pow(value - arrayOfY[i], 2);
                     }
-                    errors.Add(Math.Sqrt(error));
+                    errors.Add(Math.Sqrt(error/ (countIntervals - 1)));
                     SetNewValue(arrayOfLoadX, arrayOfLoadY, values);
                     var result = MessageBox.Show("Загрузить следующий?", "Работоспособность сети", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (result == DialogResult.No)
@@ -386,7 +393,7 @@ namespace ApproximationHRBF
         private void тестСетиToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //new Thread(() => Compute()).Start();
-            chartHystogram.Series[4].Points.Clear();
+            chartHystogram.Series[3].Points.Clear();
             Compute();
         }
 

@@ -160,7 +160,7 @@
             this.textBoxMoment.Name = "textBoxMoment";
             this.textBoxMoment.Size = new System.Drawing.Size(100, 20);
             this.textBoxMoment.TabIndex = 12;
-            this.textBoxMoment.Text = "0.03";
+            this.textBoxMoment.Text = "0.3";
             // 
             // textBoxCoefT
             // 

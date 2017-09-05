@@ -7,6 +7,8 @@ namespace ApproximationHRBF
     {
         public double Weight { get; set; }
 
+        public double LastWeight { get; set; }
+
         public double Radius { get; set; }
 
         public double Center { get; set; }
@@ -16,12 +18,12 @@ namespace ApproximationHRBF
             this.Weight = weight;
             this.Radius = radius;
             this.Center = center;
+            this.LastWeight = 0.0;
         }
 
         public Neuron()
         {
-            this.Center = new Random().NextDouble();
-            this.Weight = new Random().NextDouble();
+            this.LastWeight = 0.0;
         }
 
         public double Compute(double x)
@@ -30,9 +32,12 @@ namespace ApproximationHRBF
             return Math.Exp(-Math.Pow(x - this.Center, 2) / (2 * Math.Pow(this.Radius, 2)));
         }
 
-        public void RecalculateWeight(double learningCoefficient, double difference, double inputX)
+        public void RecalculateWeight(double learningCoefficient, double difference, double inputX, double momentum)
         {
-            this.Weight -= learningCoefficient * difference * Compute(inputX);
+            double curW = this.Weight;
+            //this.Weight -= learningCoefficient * difference * Compute(inputX);
+            this.Weight = this.Weight - learningCoefficient * difference * Compute(inputX) + momentum * (this.Weight - this.LastWeight);
+            this.LastWeight = curW;
         }
 
         public void RecalculateCenter(double learningCoefficient, double difference, double inputX)

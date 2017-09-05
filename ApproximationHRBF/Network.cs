@@ -31,8 +31,8 @@ namespace ApproximationHRBF
         public void InitializeHideNeurons(double[] arrayOfX)
         {
             for (int i = 0; i < arrayOfX.Length; i++)
-                //Layers[1].InitNeuron(i, new System.Random().NextDouble(), arrayOfX[i]);
-                Layers[1].InitNeuron(i, 0.5 * (new System.Random().NextDouble() * 2 - 1), arrayOfX[i]);
+                Layers[1].InitNeuron(i, new System.Random().NextDouble(), arrayOfX[i]);
+                //Layers[1].InitNeuron(i, 0.5 * (new System.Random().NextDouble() * 2 - 1), arrayOfX[i]);
             Layers[1].InitRadius(MaximumRadius() / System.Math.Sqrt(2 * arrayOfX.Length));
         }
 
@@ -49,10 +49,11 @@ namespace ApproximationHRBF
             //double sum = 0;
             /*for (int j = 0; j < Layers[1].CountNeurons; j++)
                 sum += Layers[1].Neurons[j].Weight * Layers[1].Neurons[j].Compute(inputX);*/
-            return Math.Pow(outputValue(inputX) - inputY, 2) / 2;
+            //return Math.Pow(outputValue(inputX) - inputY, 2) / 2;
+            return Math.Pow(outputValue(inputX) - inputY, 2);
         }
 
-        private bool Epoch(double[] arrayOfX, double[] arrayOfY, double error, double learningCoefficient, out double err)
+        private bool Epoch(double[] arrayOfX, double[] arrayOfY, double error, double learningCoefficient, double momentum, int count, out double err)
         {
             err = 0;
             //
@@ -71,11 +72,12 @@ namespace ApproximationHRBF
 
                 double difference = y - arrayOfY[i];
 
-                Layers[1].Neurons[i].RecalculateWeight(learningCoefficient, difference, arrayOfX[i]);
+                Layers[1].Neurons[i].RecalculateWeight(learningCoefficient, difference, arrayOfX[i], momentum);
                 Layers[1].Neurons[i].RecalculateCenter(learningCoefficient, difference, arrayOfX[i]);
                 Layers[1].Neurons[i].RecalculateRadius(learningCoefficient, difference, arrayOfX[i]);
             }
             FormMain.Set(arrayOfX, mas);
+            err = Math.Sqrt(err / (count-1));
             return (err <= error);
         }
 
@@ -87,7 +89,7 @@ namespace ApproximationHRBF
             double err;
             while (j++ < countItterations)
             {
-                if (Epoch(arrayOfX, arrayOfY, error, learningCoefficient, out err))
+                if (Epoch(arrayOfX, arrayOfY, error, learningCoefficient, momentum, arrayOfX.Length, out err))
                     break;
                 form.SetCurrentIteration(j);
                 form.SetCurrentError(err);
